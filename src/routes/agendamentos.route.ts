@@ -1,26 +1,29 @@
-import { Router} from 'express'; 
+import { Router } from 'express'; 
 import { uuid } from 'uuidv4'; 
-
-
+import {  startofHour , parseISO } from 'date-fns'; 
 
 const agendamentosRouter = Router(); 
 
-const agendamentos = []; 
+const agendamentos = [];
 
-agendamentosRouter.post('/' , (req, res)  => {
-  const {  provider , date } = req.body; 
+agendamentosRouter.post('/' , (request, response) => {
+  const {  provider , date } = request.body; 
 
-  const agendamento = { 
+  const parsedDate = startofHour(parseISO(date));
+
+  
+
+
+
+  const agendamento = {
     id:  uuid(),
     provider,
     date, 
-  };
+  }; 
 
-  agendamentos.push(agendamento);
-return res.json(agendamento);
+  agendamentos.push(agendamento)
+
+  return response.json(agendamento); 
 });
 
-
-
 export default agendamentosRouter; 
-

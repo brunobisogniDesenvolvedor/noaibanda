@@ -3,8 +3,8 @@ import express from 'express';
 
 const app = express();
 
-app.get('/' , (req, res) => {
-  return res.json({ message : 'hello'});
+app.get('/' , (request, response) => {
+  return response.json({message :  "hello word" });
 })
 
 app.listen(3333, () => {
