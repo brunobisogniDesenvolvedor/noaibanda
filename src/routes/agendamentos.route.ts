@@ -1,20 +1,26 @@
 import { Router } from 'express'; 
-import {  uuid } from 'uuidv4' ; 
-import {  startOfHour , parseISO, isEqual } from 'date-fns'; 
-import Agendamento from '../models/Agendamento'; 
+import {  startOfHour , parseISO } from 'date-fns'; 
+
+import AgendamentosRepository from '../repositories/AgendamentoRepository'; 
 
 const agendamentosRouter = Router(); 
+const agendamentosRepository = new AgendamentosRepository(); 
 
-const agendamentos:  Agendamento[] = []; 
+agendamentosRouter.get('/' , (request , response) => {
+  const agendamentos = agendamentosRepository.all(); 
+
+  return response.json(agendamentos);  
+})
 
 agendamentosRouter.post('/' , (request , response) => {
   const { provider , date } = request.body;
 
   const parsedDate =  startOfHour(parseISO(date)); 
 
-  const findAgendamentoInSameDate = agendamentos.find(agendamento => 
-    isEqual(parsedDate , agendamento.date), 
-    );
+  const findAgendamentoInSameDate = agendamentosRepository.findByDate(
+    parsedDate); 
+
+
 
     if ( findAgendamentoInSameDate) {
       return response
@@ -22,9 +28,9 @@ agendamentosRouter.post('/' , (request , response) => {
         .json({ messagem :  'Esse horário já foi reservado'}); 
     }
 
-    const agendamento = new Agendamento(provider, parsedDate);
+    const agendamento = agendamentosRepository.create(provider , parsedDate); 
 
-    agendamentos.push(agendamento); 
+  
 
     return response.json(agendamento); 
     });
