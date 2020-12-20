@@ -1,24 +1,39 @@
 import { Router } from 'express'; 
-import { uuid } from 'uuidv4'; 
-import {  startofHour , parseISO } from 'date-fns'; 
+import { v4 as uuidv4, v4 } from 'uuid';
+import {  startOfHour , parseISO, isEqual } from 'date-fns'; 
+
 
 const agendamentosRouter = Router(); 
 
-const agendamentos = [];
+interface Agendamento{
+
+  id : string; 
+  provider:  string; 
+  date:  Date; 
+
+}
+
+const agendamentos: Agendamento[] = []; 
 
 agendamentosRouter.post('/' , (request, response) => {
   const {  provider , date } = request.body; 
 
-  const parsedDate = startofHour(parseISO(date));
+  const parsedDate = startOfHour(parseISO(date));
+  const findagendamentoInSameDate = agendamentos.find(agendamento => 
+    isEqual(parsedDate, agendamento.date), 
 
-  
+); 
 
-
+if (findagendamentoInSameDate) {
+  return response
+  .status(400)
+  .json({ message:  ' Esse horário está ocupado, escolha outro !!'})
+}
 
   const agendamento = {
-    id:  uuid(),
+    id:  v4(),
     provider,
-    date, 
+    date : parsedDate, 
   }; 
 
   agendamentos.push(agendamento)
