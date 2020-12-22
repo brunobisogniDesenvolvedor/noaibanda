@@ -1,35 +1,18 @@
-import {  isEqual } from 'date-fns'; 
+import { EntityRepository , Repository} from 'typeorm'; 
+
 import Agendamento from '../models/Agendamento'; 
+ 
 
-class AgendamentosRepository {
+@EntityRepository(Agendamento)
+class AgendamentosRepository extends Repository<Agendamento>{
+  public async findByDate(date: Date) : Promise<Agendamento | null > {
+  const findAgendamento = await this.findOne({
+    where: { date }
+  }); 
 
-  private agendamentos :  Agendamento[]; 
-
-  constructor( ) {
-    this.agendamentos = []; 
+      return findAgendamento || null 
   }
 
-  public all() :  Agendamento [] {
-    return this.agendamentos; 
-  }
-
-  public findByDate(date: Date) : Agendamento | null  {
-    const findAgendamento = this.agendamentos.find(agendamento => 
-      isEqual(date , agendamento.date), 
-      ); 
-
-      return findAgendamento || null;  
-
-  }
-
-  public create(provider : string , date: Date) : Agendamento {
-    const agendamento = new Agendamento(provider , date); 
-
-    this.agendamentos.push(agendamento); 
-
-    return agendamento; 
-
-   }
 }
 
 export default AgendamentosRepository; 

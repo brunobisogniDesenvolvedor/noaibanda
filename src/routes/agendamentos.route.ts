@@ -1,38 +1,39 @@
-import { Router } from 'express'; 
-import {  startOfHour , parseISO } from 'date-fns'; 
+import {  Router } from 'express'; 
+import {  getCustomRepository } from 'typeorm'; 
+import { parseISO } from 'date-fns'; 
 
-import AgendamentosRepository from '../repositories/AgendamentoRepository'; 
+import AgendamentoRepository from '../repositories/AgendamentoRepository';
+import CreateAgendamentoService from '../services/CreateAgendamentoService'; 
+import AgendamentosRepository from '../repositories/AgendamentoRepository';
+
 
 const agendamentosRouter = Router(); 
-const agendamentosRepository = new AgendamentosRepository(); 
 
-agendamentosRouter.get('/' , (request , response) => {
-  const agendamentos = agendamentosRepository.all(); 
+agendamentosRouter.get('/' , (request, respose ) => {
+  const agendamentosRepository = getCustomRepository(AgendamentosRepository); 
+  const agendamentos = agendamentosRepository.find();
 
-  return response.json(agendamentos);  
-})
+  return respose.json(agendamentos); 
+} ); 
 
-agendamentosRouter.post('/' , (request , response) => {
-  const { provider , date } = request.body;
+agendamentosRouter.post('/' , async (request, respose) => {
+    try {
+      const { provider , date } = request.body;
 
-  const parsedDate =  startOfHour(parseISO(date)); 
+      const parsedDate = parseISO(date);
 
-  const findAgendamentoInSameDate = agendamentosRepository.findByDate(
-    parsedDate); 
+      const createAgendamento = new CreateAgendamentoService(); 
 
+      const agendamento = await createAgendamento.execute({
+        date: parsedDate,
+        provider, 
+      });
 
-
-    if ( findAgendamentoInSameDate) {
-      return response
-        .status(400)
-        .json({ messagem :  'Esse horário já foi reservado'}); 
+      return respose.json(agendamento);
+    }catch(err) {
+      return respose.status(400).json({error: err.message}); 
     }
 
-    const agendamento = agendamentosRepository.create(provider , parsedDate); 
+});
 
-  
-
-    return response.json(agendamento); 
-    });
-
-    export default agendamentosRouter; 
+export default agendamentosRouter; 
